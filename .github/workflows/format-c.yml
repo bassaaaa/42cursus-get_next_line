@@ -1,0 +1,26 @@
+name: Format C
+
+on:
+  workflow_call:
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install c_formatter_42
+        run: pip install c-formatter-42
+
+      - name: Format code
+        run: |
+          find . \( -name "*.c" -o -name "*.h" \) | grep -v "/.git/" | xargs -I {} c_formatter_42 {}
+
+      - name: Commit formatted code
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --quiet && exit 0
+          git add -u
+          git commit -m "format: apply c_formatter_42"
+          git push

@@ -1,0 +1,47 @@
+name: Norminette
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  format:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/format-c.yml
+
+  norminette:
+    needs: format
+    runs-on: ubuntu-latest
+    outputs:
+      norm_output: ${{ steps.norminette.outputs.output }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install norminette
+        run: pip install norminette
+
+      - name: Run norminette
+        id: norminette
+        run: |
+          set +e
+          OUTPUT=$(norminette 2>&1)
+          EXIT_CODE=$?
+          echo "$OUTPUT"
+          {
+            echo "output<<EOF"
+            echo "$OUTPUT"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+          exit $EXIT_CODE
+
+  notify:
+    needs: [format, norminette]
+    if: always()
+    uses: ./.github/workflows/notify-discord.yml
+    with:
+      job_status: ${{ (needs.format.result == 'success' && needs.norminette.result == 'success') && 'success' || 'failure' }}
+      norm_output: ${{ needs.norminette.outputs.norm_output }}
+    secrets: inherit

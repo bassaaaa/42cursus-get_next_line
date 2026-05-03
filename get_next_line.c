@@ -23,5 +23,5 @@ char	*get_next_line(int fd)
 	buf = malloc(size);
 	if (!buf)
 		return (NULL);
-	return read_line(fd, buf, size);
+	return (read_line(fd, buf, size));
 }

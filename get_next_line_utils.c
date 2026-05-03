@@ -15,7 +15,7 @@
 static char	*resize_buf_if_needed(char *buf, size_t *size, size_t i)
 {
 	char	*resized;
-    size_t j;
+	size_t	j;
 
 	if (i + 1 >= *size)
 	{
@@ -26,7 +26,7 @@ static char	*resize_buf_if_needed(char *buf, size_t *size, size_t i)
 			free(buf);
 			return (NULL);
 		}
-        j= 0;
+		j = 0;
 		while (j + BUFFER_SIZE < *size)
 		{
 			resized[j] = buf[j];

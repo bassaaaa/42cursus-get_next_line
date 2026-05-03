@@ -1,173 +1,94 @@
-# 42 C Project Template
+*This project has been created as part of the 42 curriculum by tsito.*
 
-42 の C 課題用テンプレートです。
+# get_next_line
 
-このリポジトリは、C 課題を始めるときの最低限の土台として使うことを想定しています。Makefile と GitHub Actions の雛形を含みますが、各課題の要件を自動で満たすものではありません。
+## Description
 
-## 重要な注意
+`get_next_line` は、ファイルディスクリプタから次の1行を読み取り、動的に確保した文字列として返す C 言語の関数である。
 
-課題要件に `README.md` の作成や内容指定がある場合は、必ずその課題要件に従って `README.md` を書いてください。
+この課題の目的は、`read`、`malloc`、`free` だけを使って、ファイルや標準入力からの逐次読み取りを正しく扱うことである。関数を繰り返し呼び出すことで、対象の入力を1行ずつ取得できる。
 
-本テンプレートを使用した結果、レビュー、機械採点、Norminette、提出チェック、その他の評価に通らなかったとしても、テンプレート作成者は一切責任を負いません。提出前の確認責任は、使用者本人にあります。
+返される文字列には、実際に読み取った行末の改行文字 `\n` が含まれる。ただし、EOF に到達し、かつファイルが改行で終わっていない場合、最後の行には `\n` は含まれない。読み取る内容が残っていない場合、またはエラーが発生した場合は `NULL` を返す。
 
-42 の課題では、ファイル名、ディレクトリ構成、Makefile のターゲット、提出対象、使用可能な関数、禁止事項が課題ごとに異なります。テンプレートをそのまま使わず、必ず subject を読み、課題ごとに調整してください。
+## Instructions
 
-## 使い方
+### 提出ファイル
 
-1. このテンプレートからリポジトリを作成する
-2. 課題の subject を読む
-3. 必要なファイルとディレクトリだけを配置する
-4. `Makefile` を課題要件に合わせて書き換える
-5. ローカルでコンパイル、Norminette、動作確認を行う
-6. 提出前に subject の提出条件と差分を確認する
+Mandatory part では、以下のファイルを使用する。
 
-## ディレクトリ構成
+- `get_next_line.c`
+- `get_next_line_utils.c`
+- `get_next_line.h`
 
-このテンプレートは、特定の課題構成を強制しません。
+実装する関数のプロトタイプは以下である。
 
-課題によっては、以下のような指定があり得ます。
+```c
+char	*get_next_line(int fd);
+```
 
-- ルート直下に `.c` / `.h` / `Makefile` を置く
-- `src/` や `includes/` などのディレクトリを使う
-- bonus 用ファイルを別名または別ディレクトリに分ける
-- 提出してよいファイルが限定されている
+### コンパイル
 
-ディレクトリ名やファイル配置は、必ず課題要件に合わせてください。
+`BUFFER_SIZE` はコンパイル時に指定できる。
 
-## Makefile
+```sh
+cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c
+```
 
-`Makefile` は雛形です。課題ごとに必ず見直してください。
+`BUFFER_SIZE` が指定されない場合は、`get_next_line.h` 内のデフォルト値が使用される。
 
-確認する項目の例:
+### 使用例
 
-- `NAME` が課題で指定された成果物名になっているか
-- ライブラリ課題なら `.a` を作る構成になっているか
-- 実行ファイル課題なら実行ファイルを作る構成になっているか
-- `SRCS` に必要なソースファイルがすべて含まれているか
-- `INCDIR` がヘッダーファイルの配置と合っているか
-- `all`, `clean`, `fclean`, `re` など、課題で求められるターゲットがあるか
-- bonus が必要な場合、`bonus` ターゲットの要件を満たしているか
+```c
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "get_next_line.h"
 
-テンプレートの Makefile は、すべての課題にそのまま使えるものではありません。
+int	main(void)
+{
+	int		fd;
+	char	*line;
 
-## GitHub Actions
+	fd = open("sample.txt", O_RDONLY);
+	if (fd < 0)
+		return (1);
+	line = get_next_line(fd);
+	while (line)
+	{
+		printf("%s", line);
+		free(line);
+		line = get_next_line(fd);
+	}
+	close(fd);
+	return (0);
+}
+```
 
-このテンプレートには、簡単な GitHub Actions のフローが含まれています。
+## Algorithm
 
-- `format-c.yml`
-  - `c_formatter_42` をインストールします
-  - リポジトリ内の `.c` と `.h` をフォーマットします
-  - 差分があれば bot が commit / push します
-- `norminette.yml`
-  - `main` への push と pull request で実行されます
-  - 先にフォーマット用 workflow を呼び出します
-  - その後、`norminette` を実行します
-- `notify-discord.yml`
-  - `DISCORD_WEBHOOK_URL` secret が設定されている場合、結果を Discord に通知します
+この実装では、`get_next_line` が呼び出されるたびに、現在のファイルディスクリプタから1文字ずつ読み取る。
 
-Actions は補助ツールです。ローカル環境、校舎環境、提出システムの結果と完全に一致する保証はありません。
+読み取り処理では、まず返却用のバッファを確保する。その後、`read(fd, &buf[i], 1)` によって1文字ずつ読み込み、読み込めた文字数を `i` で管理する。改行文字 `\n` を読み取った場合、その文字も返却する文字列に含めたうえで読み取りを終了する。
 
-## 提出前チェック
+EOF に到達した場合は、それまでに1文字以上読めていれば、その内容を最後の行として返す。このとき、ファイルが改行で終わっていなければ、返却文字列の末尾に `\n` は追加しない。まだ1文字も読めていない状態で EOF に到達した場合は、読み取る行が残っていないため `NULL` を返す。
 
-提出前に少なくとも以下を確認してください。
+読み取り中にバッファの容量が足りなくなった場合は、補助関数で新しいバッファを確保し、既に読み取った内容をコピーしてから古いバッファを解放する。これにより、行の長さが `BUFFER_SIZE` より大きい場合でも、必要な分だけ領域を広げて1行全体を返せる。
 
-- subject の提出ファイル一覧と一致している
-- 不要なファイルやテストコードを提出対象に含めていない
-- `make`, `make clean`, `make fclean`, `make re` が期待通りに動く
-- `-Wall -Wextra -Werror` でコンパイルできる
-- Norminette に通る
-- メモリリーク、未初期化値、未定義動作がない
-- 許可されていない関数を使っていない
-- bonus の扱いが課題要件と一致している
+この方式では1文字ずつ読み取るため、改行を越えて余分な文字を読み込むことがない。そのため、次回の `get_next_line` 呼び出し時にもファイルディスクリプタの読み取り位置は次の行の先頭にある。余分に読み込んだデータを保持するための追加状態を持たずに、行単位の読み取りを実現できる。
 
-## この README について
+一方で、`read` の呼び出し回数は多くなるため、性能面ではまとめて読み込む実装より不利である。この課題では、まず正しい行境界、EOF、改行なしの最終行、メモリ確保失敗を明確に扱うことを優先している。
 
-この README はテンプレートの説明用です。課題で README の内容が指定されている場合は、この内容を残すのではなく、課題要件に合わせて書き直してください。
+## Resources
 
----
+参考にした一般的な資料:
 
-# 42 C Project Template
+- `man read`
+- `man malloc`
+- `man free`
+- [Tripouille/gnlTester](https://github.com/Tripouille/gnlTester) - GNL Tester
 
-This is a template repository for 42 C projects.
+AI の使用:
 
-It is intended to provide a minimal starting point for C assignments. It includes a Makefile template and GitHub Actions workflows, but it does not automatically satisfy the requirements of every project.
-
-## Important Notes
-
-If the assignment requires a `README.md` file or specifies what must be written in it, you must write `README.md` according to the assignment requirements.
-
-The template author assumes no responsibility if using this template causes you to fail a review, automated grading, Norminette, submission check, or any other evaluation. You are responsible for verifying your own submission before turning it in.
-
-In 42 projects, file names, directory structure, Makefile targets, submitted files, allowed functions, and forbidden items differ by assignment. Do not use this template as-is. Always read the subject and adjust the project accordingly.
-
-## Usage
-
-1. Create a repository from this template
-2. Read the assignment subject
-3. Place only the required files and directories
-4. Rewrite `Makefile` to match the assignment requirements
-5. Run compilation, Norminette, and behavior checks locally
-6. Before submission, verify the subject requirements and your final diff
-
-## Directory Structure
-
-This template does not enforce a specific project structure.
-
-Depending on the assignment, you may be required to:
-
-- Place `.c` / `.h` / `Makefile` directly at the repository root
-- Use directories such as `src/` or `includes/`
-- Separate bonus files by file name or directory
-- Submit only a limited set of files
-
-Always follow the assignment requirements for directory names and file placement.
-
-## Makefile
-
-`Makefile` is only a template. Review and update it for each assignment.
-
-Examples of items to check:
-
-- Whether `NAME` matches the required output name
-- Whether library projects build a `.a` archive
-- Whether executable projects build the required executable
-- Whether `SRCS` includes all required source files
-- Whether `INCDIR` matches the header file location
-- Whether required targets such as `all`, `clean`, `fclean`, and `re` are present
-- Whether the `bonus` target satisfies the assignment requirements, if bonus is required
-
-The template Makefile is not suitable for every assignment as-is.
-
-## GitHub Actions
-
-This template includes simple GitHub Actions workflows.
-
-- `format-c.yml`
-  - Installs `c_formatter_42`
-  - Formats `.c` and `.h` files in the repository
-  - Commits and pushes changes as a bot if formatting creates a diff
-- `norminette.yml`
-  - Runs on push and pull request to `main`
-  - Calls the formatting workflow first
-  - Runs `norminette` afterward
-- `notify-discord.yml`
-  - Sends the result to Discord if the `DISCORD_WEBHOOK_URL` secret is configured
-
-Actions are helper tools only. Their results are not guaranteed to match your local environment, campus environment, or the official submission system.
-
-## Pre-Submission Checklist
-
-Before submitting, check at least the following:
-
-- The submitted files match the subject
-- Unnecessary files and test code are not included in the submission
-- `make`, `make clean`, `make fclean`, and `make re` work as expected
-- The project compiles with `-Wall -Wextra -Werror`
-- Norminette passes
-- There are no memory leaks, uninitialized values, or undefined behavior
-- No forbidden functions are used
-- Bonus handling matches the assignment requirements
-
-## About This README
-
-This README explains the template itself. If an assignment specifies README requirements, do not keep this content as-is. Rewrite it according to the assignment requirements.
+- README 要件の整理
+- 日本語 README の構成作成
+- アルゴリズム説明文の表現調整

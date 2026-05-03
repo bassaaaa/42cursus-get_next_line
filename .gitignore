@@ -1,6 +1,6 @@
 *.out
 *.o
 
-/.claude
+/gnlTester
 
 .DS_Store

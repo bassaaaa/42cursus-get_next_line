@@ -6,58 +6,61 @@
 /*   By: tsito <tsito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 22:26:16 by tsito             #+#    #+#             */
-/*   Updated: 2026/05/03 14:47:37 by tsito            ###   ########.fr       */
+/*   Updated: 2026/05/03 17:15:41 by tsito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*expand_line(char *line, size_t size)
+static char	*resize_buf_if_needed(char *buf, size_t *size, size_t i)
 {
-	char	*newline;
-	size_t	i;
+	char	*resized;
+    size_t j;
 
-	i = 0;
-	newline = malloc(size);
-	if (!newline)
+	if (i + 1 >= *size)
 	{
-		free(line);
-		return (NULL);
+		*size += BUFFER_SIZE;
+		resized = malloc(*size);
+		if (!resized)
+		{
+			free(buf);
+			return (NULL);
+		}
+        j= 0;
+		while (j + BUFFER_SIZE < *size)
+		{
+			resized[j] = buf[j];
+			j++;
+		}
+		free(buf);
+		return (resized);
 	}
-	while (i < size - BUFFER_SIZE)
-	{
-		newline[i] = line[i];
-		i++;
-	}
-	free(line);
-	return (newline);
+	return (buf);
 }
 
-char	*read_line(int fd)
+char	*read_line(int fd, char *buf, size_t size)
 {
-	size_t	size;
 	size_t	i;
-	char	*line;
 	int		bytes;
 
-	size = BUFFER_SIZE;
-	line = malloc(size);
-	if (!line)
-		return (NULL);
 	i = 0;
 	while (1)
 	{
-		if (i + BUFFER_SIZE >= size) {
-            size += BUFFER_SIZE;
-			line = expand_line(line, size);
-        }
-		bytes = read(fd, &line[i], 1);
-		if (bytes <= 0) {
-            free(line);
-			return NULL;
-        }
-		if (line[i++] == '\n')
+		buf = resize_buf_if_needed(buf, &size, i);
+		if (!buf)
+			return (NULL);
+		bytes = read(fd, &buf[i], 1);
+		if (bytes <= 0)
+			break ;
+		i++;
+		if (buf[i - 1] == '\n')
 			break ;
 	}
-	return (line);
+	if (bytes < 0 || i == 0)
+	{
+		free(buf);
+		return (NULL);
+	}
+	buf[i] = '\0';
+	return (buf);
 }

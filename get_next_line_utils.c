@@ -6,7 +6,7 @@
 /*   By: tsito <tsito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 22:26:16 by tsito             #+#    #+#             */
-/*   Updated: 2026/05/03 17:15:41 by tsito            ###   ########.fr       */
+/*   Updated: 2026/05/06 22:49:55 by tsito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ static char	*resize_buf_if_needed(char *buf, size_t *size, size_t i)
 	return (buf);
 }
 
-char	*read_line(int fd, char *buf, size_t size)
+char	*gnl_read_line(int fd, char *buf, size_t size)
 {
 	size_t	i;
 	int		bytes;

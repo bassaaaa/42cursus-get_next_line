@@ -6,7 +6,7 @@
 /*   By: tsito <tsito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 21:52:39 by tsito             #+#    #+#             */
-/*   Updated: 2026/05/03 16:06:35 by tsito            ###   ########.fr       */
+/*   Updated: 2026/05/06 22:50:06 by tsito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,5 +23,5 @@ char	*get_next_line(int fd)
 	buf = malloc(size);
 	if (!buf)
 		return (NULL);
-	return (read_line(fd, buf, size));
+	return (gnl_read_line(fd, buf, size));
 }

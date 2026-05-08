@@ -153,6 +153,7 @@ AI usage:
 | Purpose | Target part |
 | --- | --- |
 | Japanese translation of requirements | Used to accurately understand the subject requirements |
+| Test code creation | Used to identify test cases and create the test code |
 | README.md proofreading | Used to revise wording and phrasing |
 | English translation of README.md | Used to produce an accurate English translation of the README |
 
@@ -304,5 +305,6 @@ AI の使用について:
 | 用途 | 対象部分 |
 |------|---------|
 | 要件の日本語訳 | 課題要件の正確な把握のため、翻訳に利用 |
+| テスト用コードの作成 | テストケースの洗い出し、テストコードの作成に利用 |
 | README.md の添削 | 文言や言い回しの修正 |
 | README.md 英語訳 | READMEの正確な英訳に利用 |

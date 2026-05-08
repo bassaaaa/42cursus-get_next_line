@@ -6,7 +6,7 @@
 /*   By: tsito <tsito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 21:52:39 by tsito             #+#    #+#             */
-/*   Updated: 2026/05/06 22:50:06 by tsito            ###   ########.fr       */
+/*   Updated: 2026/05/08 13:46:40 by tsito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ char	*get_next_line(int fd)
 	char	*buf;
 	size_t	size;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 	size = BUFFER_SIZE + 1;
 	buf = malloc(size);

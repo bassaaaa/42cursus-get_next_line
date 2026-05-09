@@ -6,33 +6,50 @@
 /*   By: tsito <tsito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 22:26:16 by tsito             #+#    #+#             */
-/*   Updated: 2026/05/06 22:49:55 by tsito            ###   ########.fr       */
+/*   Updated: 2026/05/09 19:22:46 by tsito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static char	*resize_buf_if_needed(char *buf, size_t *size, size_t i)
+static char	*copy_to_resized(char *buf, size_t i, size_t new_size)
 {
 	char	*resized;
 	size_t	j;
 
+	resized = malloc(new_size);
+	if (!resized)
+	{
+		free(buf);
+		return (NULL);
+	}
+	j = 0;
+	while (j < i)
+	{
+		resized[j] = buf[j];
+		j++;
+	}
+	free(buf);
+	return (resized);
+}
+
+static char	*resize_buf_if_needed(char *buf, size_t *size, size_t i)
+{
+	char	*resized;
+	size_t	new_size;
+
 	if (i + 1 >= *size)
 	{
-		*size += BUFFER_SIZE;
-		resized = malloc(*size);
-		if (!resized)
+		new_size = *size * 2;
+		if (new_size <= *size)
 		{
 			free(buf);
 			return (NULL);
 		}
-		j = 0;
-		while (j + BUFFER_SIZE < *size)
-		{
-			resized[j] = buf[j];
-			j++;
-		}
-		free(buf);
+		resized = copy_to_resized(buf, i, new_size);
+		if (!resized)
+			return (NULL);
+		*size = new_size;
 		return (resized);
 	}
 	return (buf);

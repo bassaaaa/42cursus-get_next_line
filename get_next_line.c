@@ -5,23 +5,95 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: tsito <tsito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/05/01 21:52:39 by tsito             #+#    #+#             */
-/*   Updated: 2026/05/08 13:46:40 by tsito            ###   ########.fr       */
+/*   Created: 2026/05/10 00:00:00 by tsito             #+#    #+#             */
+/*   Updated: 2026/05/10 18:50:23 by tsito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*get_next_line(int fd)
+static char	*append_str(char *stash, char *buffer)
+{
+	char	*joined;
+
+	joined = gnl_strjoin(stash, buffer);
+	free(stash);
+	return (joined);
+}
+
+static char	*read_until_line(int fd, char *stash)
 {
 	char	*buf;
-	size_t	size;
+	ssize_t	bytes_read;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (NULL);
-	size = BUFFER_SIZE + 1;
-	buf = malloc(size);
+	buf = malloc((size_t)BUFFER_SIZE + 1);
 	if (!buf)
+		return (free(stash), NULL);
+	bytes_read = 1;
+	while (!gnl_strchr(stash, '\n') && bytes_read > 0)
+	{
+		bytes_read = read(fd, buf, BUFFER_SIZE);
+		if (bytes_read == -1)
+		{
+			free(buf);
+			free(stash);
+			return (NULL);
+		}
+		buf[bytes_read] = '\0';
+		stash = append_str(stash, buf);
+	}
+	free(buf);
+	return (stash);
+}
+
+static char	*extract_line(char *stash)
+{
+	size_t	i;
+
+	if (!stash || !stash[0])
 		return (NULL);
-	return (gnl_read_line(fd, buf, size));
+	i = 0;
+	while (stash[i] && stash[i] != '\n')
+		i++;
+	if (stash[i] == '\n')
+		i++;
+	return (gnl_substr(stash, 0, i));
+}
+
+static char	*update_stash(char *stash)
+{
+	char	*new_stash;
+	size_t	i;
+
+	i = 0;
+	while (stash[i] && stash[i] != '\n')
+		i++;
+	if (!stash[i])
+	{
+		free(stash);
+		return (NULL);
+	}
+	i++;
+	new_stash = gnl_substr(stash, i, gnl_strlen(stash) - i);
+	free(stash);
+	return (new_stash);
+}
+
+char	*get_next_line(int fd)
+{
+	static char	*stash;
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	{
+		free(stash);
+		stash = NULL;
+		return (NULL);
+	}
+	stash = read_until_line(fd, stash);
+	if (!stash)
+		return (NULL);
+	line = extract_line(stash);
+	stash = update_stash(stash);
+	return (line);
 }

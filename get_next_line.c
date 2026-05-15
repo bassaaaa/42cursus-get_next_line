@@ -6,7 +6,7 @@
 /*   By: tsito <tsito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/10 00:00:00 by tsito             #+#    #+#             */
-/*   Updated: 2026/05/10 18:50:23 by tsito            ###   ########.fr       */
+/*   Updated: 2026/05/15 22:32:28 by tsito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,10 @@ static char	*read_until_line(int fd, char *stash)
 
 	buf = malloc((size_t)BUFFER_SIZE + 1);
 	if (!buf)
-		return (free(stash), NULL);
+	{
+		free(stash);
+		return (NULL);
+	}
 	bytes_read = 1;
 	while (!gnl_strchr(stash, '\n') && bytes_read > 0)
 	{

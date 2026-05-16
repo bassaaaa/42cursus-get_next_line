@@ -26,7 +26,9 @@ This repository contains the mandatory implementation only:
 The implementation follows the 42 Norm and uses only the allowed external
 functions: `read`, `malloc`, and `free`.
 
-## Build
+## Instructions
+
+### Build
 
 Compile the mandatory files from the repository root:
 
@@ -43,7 +45,7 @@ cc -Wall -Wextra -Werror -D BUFFER_SIZE=1 get_next_line.c get_next_line_utils.c
 If `BUFFER_SIZE` is not provided by the compiler command, `get_next_line.h`
 defines it as `42`.
 
-## Usage
+### Usage
 
 ```c
 #include <fcntl.h>
